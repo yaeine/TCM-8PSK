@@ -1,0 +1,90 @@
+clc
+clear all
+close all
+% global 
+global tst_outconv
+global tst_outunconv
+global  state_inbits1; % 【取值-1,0,1】
+global state_branch;
+global state_branchindex;
+global min_for_A;
+global min_for_B;
+global min_for_C;
+global min_for_D;
+global Len_data
+global mapping1
+global mapping2
+data0 = randi([0,1],1,200000);
+mapping1 = [2,-2,0,0,sqrt(2),-sqrt(2),-sqrt(2),sqrt(2)];
+mapping2 = [0,0,2,-2,sqrt(2),-sqrt(2),sqrt(2),-sqrt(2)];
+% ViterbiInit; % 【全局变量state_inbits1和state_inbits2 4x4 取值为-1,0,1】
+state_inbits1 = [-1 1 0 0;
+                 0 0 -1 1;
+                 -1 1 0 0;
+                 0 0 -1 1];
+
+%卷积编码
+Len_data = length(data0);
+%for ii = 1:(Len_data/2)
+conv_in = data0(1:2:end);
+uncode_in = data0(2:2:end);
+uncode_in = [uncode_in 0 0] 
+conv_out = encoding_213(conv_in);
+
+%映射到8psk星座图
+tx_map = zeros(1,2+Len_data/2);
+for ii = 1:(2+Len_data/2)
+    tx_map(ii) = 4*conv_out(2*ii-1)+2*conv_out(2*ii)+uncode_in(ii); 
+end    
+
+[tx_8psk_out] = modulate_8psk(tx_map)
+
+
+figure(1)
+   scatter(real(tx_8psk_out),imag(tx_8psk_out),'filled','r');
+   title('经过高斯白噪声信道后，数据部分12QAM调制星座图');
+   axis([-2.5 2.5 -2.5 2.5])
+
+      
+%加噪
+
+SNR = 0:0.5:10;
+
+for n = 1:length(SNR)
+
+
+rx_TC8PSK = awgn(tx_8psk_out,SNR(n),'measured');
+
+
+%viterbi译码_硬判决-------------------------------------------------------------
+for ii = 1:Len_data/2+2
+    rx_i = real(rx_TC8PSK(ii));
+    rx_q = imag(rx_TC8PSK(ii));
+    for jj = 1:8
+        eu_distance(jj) = (rx_i-mapping1(jj))^2+(rx_q-mapping2(jj))^2;
+    end
+    [min_distance,min_index] = min(eu_distance);
+    demod_arr = de2bi(min_index-1,3,'left-msb');
+    viterbi_in(2*ii-1:2*ii) =  demod_arr(1:2) ;
+    uncode_out(ii) = demod_arr(3);
+end
+conv_decout = func_conv_dec_213_hard(viterbi_in);
+for ii = 1:Len_data/2
+    dec_outbits(2*ii-1)= conv_decout(ii);
+    dec_outbits(2*ii) = uncode_out(ii);
+end
+
+
+[nErrors_h, BER_h(1,n)] = biterr(data0,dec_outbits);
+% figure(2)
+% scatterplot(rxSig);  
+end
+
+figure(6)
+semilogy(SNR,BER_h,'r');grid on; %对y取对数形式
+grid on;
+xlabel('SNR (dB)'); ylabel('BER');
+title('TCM Modulation with a convolutional encoder in an AWGN channel'); 
+
+
+                           
