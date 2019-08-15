@@ -140,7 +140,7 @@ end
 
 figure(6)
 semilogy(SNR,BER_h,'r');hold on; %对y取对数形式
-semilogy(SNR,BER_s,'b');grid on;
+semilogy(SNR,BER_s,'b');hold on;
 semilogy(SNR,BER_n,'g');hold on;
 semilogy(SNR,BER_Q,'m');hold on;
 xlabel('SNR (dB)'); ylabel('BER');
