@@ -4,7 +4,7 @@ close all
 % global 
 global tst_outconv
 global tst_outunconv
-global  state_inbits1; % ¡¾È¡Öµ-1,0,1¡¿
+global  state_inbits1; % ã€å–å€¼-1,0,1ã€‘
 global state_branch;
 global state_branchindex;
 global min_for_A;
@@ -24,26 +24,26 @@ mapping1 = [2,-2,0,0,sqrt(2),-sqrt(2),-sqrt(2),sqrt(2)];
 mapping2 = [0,0,2,-2,sqrt(2),-sqrt(2),sqrt(2),-sqrt(2)];
 mapping3 = [2,0,-2,0];
 mapping4 = [0,2,0,-2];
-% ViterbiInit; % ¡¾È«¾Ö±äÁ¿state_inbits1ºÍstate_inbits2 4x4 È¡ÖµÎª-1,0,1¡¿
+% ViterbiInit; % ã€å…¨å±€å˜é‡state_inbits1å’Œstate_inbits2 4x4 å–å€¼ä¸º-1,0,1ã€‘
 state_inbits1 = [-1 1 0 0;
                  0 0 -1 1;
                  -1 1 0 0;
                  0 0 -1 1];
-%¾í»ı±àÂë
+%å·ç§¯ç¼–ç 
 %for ii = 1:(Len_data/2)
 conv_in = data0(1:2:end);
 uncode_in = data0(2:2:end);
 uncode_in = [uncode_in 0 0] 
 conv_out = encoding_213(conv_in);
 
-%Ó³Éäµ½8pskĞÇ×ùÍ¼-1
+%æ˜ å°„åˆ°8pskæ˜Ÿåº§å›¾-1
 tx_map = zeros(1,2+Len_data/2);
 for ii = 1:(2+Len_data/2)
     tx_map(ii) = 4*conv_out(2*ii-1)+2*conv_out(2*ii)+uncode_in(ii); 
 end    
 
 [tx_8psk_out] = modulate_8psk(tx_map);
-%%Ó³Éäµ½8pskĞÇ×ùÍ¼-nomal
+%%æ˜ å°„åˆ°8pskæ˜Ÿåº§å›¾-nomal
 for ii = 1:(nomal_len/3)
     nomal_map(ii) = 4*nomal_in(1,ii)+2*nomal_in(2,ii)+nomal_in(3,ii); 
 end    
@@ -61,7 +61,7 @@ end
 
 figure(1)
    scatter(real(tx_8psk_out),imag(tx_8psk_out),'filled','r')
-   title('8PSKµ÷ÖÆĞÇ×ùÍ¼');
+   title('8PSKè°ƒåˆ¶æ˜Ÿåº§å›¾');
    axis([-2.5 2.5 -2.5 2.5])   
 
 SNR = 0:1:20;
@@ -78,7 +78,7 @@ if n == 21
 end
 
 
-%viterbiÒëÂë_Ó²ÅĞ¾ö-------------------------------------------------------------
+%viterbiè¯‘ç _ç¡¬åˆ¤å†³-------------------------------------------------------------
 for ii = 1:Len_data/2+2
     rx_i = real(rx_TC8PSK(ii));
     rx_q = imag(rx_TC8PSK(ii));
@@ -96,7 +96,7 @@ for ii = 1:Len_data/2
     dec_outbits_h(2*ii) = uncode_out(ii);
 end
 
-%nomalÓ²ÅĞ¾ö
+%nomalç¡¬åˆ¤å†³
 for ii = 1:nomal_len/3
     rx_i = real(rx_nomal8psk(ii));
     rx_q = imag(rx_nomal8psk(ii));
@@ -109,7 +109,7 @@ for ii = 1:nomal_len/3
 end
 nomal_finalout = nomal_out(1:Len_data)
 
-%QPSKÓ²ÅĞ¾ö
+%QPSKç¡¬åˆ¤å†³
 for ii = 1:Len_data/2
     rx_i = real(rx_TCQPSK(ii));
     rx_q = imag(rx_TCQPSK(ii));
@@ -130,7 +130,7 @@ QPSK_finalout = QPSK_out(1:Len_data);
 [nErrors_n, BER_n(1,n)] = biterr(data0,nomal_finalout);
 [nErrors_Q, BER_Q(1,n)] = biterr(data0,QPSK_finalout);
 
-%ÈíÅĞ¾ö----------------------------------------------------------------
+%è½¯åˆ¤å†³----------------------------------------------------------------
 
 Eudistance_computing(rx_TC8PSK);
 [dec_outbits_s] =ViterbiDecoder(state_branch,state_branchindex);
@@ -139,12 +139,12 @@ Eudistance_computing(rx_TC8PSK);
 end
 
 figure(6)
-semilogy(SNR,BER_h,'r');hold on; %¶ÔyÈ¡¶ÔÊıĞÎÊ½
+semilogy(SNR,BER_h,'r');hold on; %å¯¹yå–å¯¹æ•°å½¢å¼
 semilogy(SNR,BER_s,'b');grid on;
 semilogy(SNR,BER_n,'g');hold on;
 semilogy(SNR,BER_Q,'m');hold on;
 xlabel('SNR (dB)'); ylabel('BER');
 title('TCM Modulation with a convolutional encoder in an AWGN channel'); 
-legend('TCM8pskÓ²ÅĞ¾ö','ÆÕÍ¨8PSK','TCM8pskÈíÅĞ¾ö','QPSK','Location','best')
+legend('TCM8pskç¡¬åˆ¤å†³','TCM8pskè½¯åˆ¤å†³','æ™®é€š8PSK','QPSK','Location','best')
 axis([0 18 10e-5 1])
                            
